@@ -22,7 +22,7 @@ class Program
                 }
                 var serviceProvider = ConfigureServices(args, opts);
                 var app = serviceProvider.GetService<App>();
-                app?.RunWithOptions(opts);
+                app?.RunWithOptions(opts, serviceProvider);
             });
     }
 

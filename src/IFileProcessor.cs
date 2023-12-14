@@ -3,6 +3,6 @@ using System.Data;
 namespace ExcelWorkbookAggregator;
 public interface IFileProcessor
 {
-    DataTable ProcessFile(string filePath);
-    void WriteToFile(DataTable data, string filePath);
+    IEnumerable<DataTable> ProcessFile(string filePath);
+    void WriteToFile(IEnumerable<DataTable> data, string filePath);
 }

@@ -1,4 +1,5 @@
-# ExcelWorkbookAggregator
+# Excel Workbook Aggregator
+
 A C# utility application for aggregating multiple input excel workbooks into one output workbook.
 
 ## Usage
@@ -11,9 +12,11 @@ Options:
 
   -o, --output     Required. File to output the result to.
 
-  -v, --verbose    Set output to verbose messages.
+  -l, --verbose    Set output to verbose messages.
 
   --help           Display this help screen.
 
   --version        Display version information.
 ```
+
+Example: `dotnet run --l --i E:\team_blue.xlsx E:\team_red.xlsx "this is my file.xlsx" --o output.xlsx``

@@ -10,12 +10,17 @@ public class CsvFileProcessor : IFileProcessor
         _logger = logger;
     }
 
-    public DataTable ProcessFile(string filePath)
+    public IEnumerable<DataTable> ProcessFile(string filePath)
     {
-        throw new NotImplementedException();
+        var result = new List<DataTable>();
+        // TODO: check that file exists and load the data
+        // TODO: parse the data into a DataTable
+        
+        //throw new NotImplementedException();
+        return result;
     }
 
-    public void WriteToFile(DataTable data, string filePath)
+    public void WriteToFile(IEnumerable<DataTable> data, string filePath)
     {
         throw new NotImplementedException();
     }

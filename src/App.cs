@@ -18,12 +18,13 @@ public class App
 
     public void RunWithOptions(Options opts, IServiceProvider serviceProvider)
     {
-        DataTable aggregatedData = new DataTable();
+        _logger.LogInformation("Processing Started!");
+        var aggregatedData = new List<DataTable>();
         foreach (var file in opts.InputFiles)
         {
             var processor = getFileProcessor(serviceProvider, file);
-            _logger.LogInformation("Processing file: " + file);
             var fileData = processor?.ProcessFile(file);
+            
             // TODO: aggregate into aggregatedData
         }
 
@@ -36,12 +37,12 @@ public class App
     {
         if(filePath.EndsWith(".xlsx"))
         {
-            _logger.LogInformation("ExcelFileProcessor selected");
+            _logger.LogInformation($"ExcelFileProcessor selected for {filePath}");
             return serviceProvider.GetService<ExcelFileProcessor>();
         }
         else
         {
-            _logger.LogInformation("CsvFileProcessor selected");
+            _logger.LogInformation($"CsvFileProcessor selected for {filePath}");
             return serviceProvider.GetService<CsvFileProcessor>();
         }
     }
