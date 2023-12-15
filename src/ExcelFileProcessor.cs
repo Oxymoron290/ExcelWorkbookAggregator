@@ -37,6 +37,12 @@ public class ExcelFileProcessor : IFileProcessor
         bool columnsAdded = false;
         foreach (IXLRow row in worksheet.RowsUsed())
         {
+            // var msg = "Data: ";
+            // foreach (var cell in row.Cells())
+            // {
+            //     msg += $"[{cell}]{cell.Value} ";
+            // }
+            // _logger.LogInformation(msg);
             if (!columnsAdded)
             {
                 foreach (IXLCell cell in row.Cells())
@@ -47,7 +53,23 @@ public class ExcelFileProcessor : IFileProcessor
             }
 
             // Add row data
-            dataTable.Rows.Add(row.Cells().Select(cell => cell.Value).ToArray());
+            var dataRow = dataTable.NewRow();
+            var i = 0;
+            foreach (var cell in row.Cells()){
+                dataRow[i++] = cell.Value;
+            }
+            dataTable.Rows.Add(dataRow);
+            // dataTable.Rows.Add(row.Cells().Select(cell => cell.Value).ToArray());
+        }
+
+        foreach(DataRow dataRow in dataTable.Rows)
+        {
+            var msg = "Data: ";
+            foreach(var item in dataRow.ItemArray)
+            {
+                msg += $"[{item}]";
+            }
+            _logger.LogInformation(msg);
         }
 
         _logger.LogInformation($"Processing {worksheet.Name} completed.");
@@ -60,6 +82,7 @@ public class ExcelFileProcessor : IFileProcessor
         using var workbook = new XLWorkbook();
         foreach (DataTable table in dataTables)
         {
+            _logger.LogInformation($"Creating worksheet {table.TableName}");
             var worksheet = workbook.Worksheets.Add(table.TableName);
 
             // Adding headers
@@ -73,7 +96,7 @@ public class ExcelFileProcessor : IFileProcessor
             {
                 for (int j = 0; j < table.Columns.Count; j++)
                 {
-                    worksheet.Cell(i + 2, j + 1).Value = (XLCellValue)table.Rows[i][j];
+                    worksheet.Cell(i + 2, j + 1).Value = table.Rows[i][j].ToString();
                 }
             }
 

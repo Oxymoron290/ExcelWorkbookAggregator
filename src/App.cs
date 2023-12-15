@@ -25,7 +25,19 @@ public class App
             var processor = getFileProcessor(serviceProvider, file);
             var fileData = processor?.ProcessFile(file);
             
-            // TODO: aggregate into aggregatedData
+            foreach(var table in fileData)
+            {
+                _logger.LogInformation($"Aggregating {table.TableName}");
+                var targetTable = aggregatedData.FirstOrDefault(d => d.TableName == table.TableName);
+                if(targetTable != null)
+                {
+                    targetTable.Merge(table);
+                }
+                else
+                {
+                    aggregatedData.Add(table);
+                }
+            }
         }
 
         var outputProcessor = getFileProcessor(serviceProvider, opts.OutputFile);
