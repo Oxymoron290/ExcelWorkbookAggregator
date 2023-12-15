@@ -10,7 +10,7 @@ public class CsvFileProcessor : IFileProcessor
         _logger = logger;
     }
 
-    public IEnumerable<DataTable> ProcessFile(string filePath)
+    public IEnumerable<DataTable> ProcessFile(string filePath, bool header)
     {
         var result = new List<DataTable>();
         // TODO: check that file exists and load the data

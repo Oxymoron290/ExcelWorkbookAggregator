@@ -12,60 +12,72 @@ public class ExcelFileProcessor : IFileProcessor
         _logger = logger;
     }
 
-    public IEnumerable<DataTable> ProcessFile(string filePath)
+    public IEnumerable<DataTable> ProcessFile(string filePath, bool header)
     {
         _logger.LogInformation($"Processing file: {filePath}");
         var result = new List<DataTable>();
-        
+
         using (var workbook = new XLWorkbook(filePath))
-        foreach (IXLWorksheet worksheet in workbook.Worksheets)
-        {
-            DataTable wsDataTable = ProcessWorksheet(worksheet);
-            result.Add(wsDataTable);
-        }
+            foreach (IXLWorksheet worksheet in workbook.Worksheets)
+            {
+                DataTable wsDataTable = ProcessWorksheet(worksheet, header);
+                result.Add(wsDataTable);
+            }
         _logger.LogInformation($"Processing {filePath} completed");
 
         return result;
     }
-    
-    private DataTable ProcessWorksheet(IXLWorksheet worksheet)
+
+    private DataTable ProcessWorksheet(IXLWorksheet worksheet, bool header)
     {
         _logger.LogInformation($"Processing {worksheet.Name} started.");
         var dataTable = new DataTable(worksheet.Name);
+
+        // Determine the number of columns
+        int numberOfColumns = worksheet.RowsUsed().Max(r => r.LastCellUsed()?.Address.ColumnNumber ?? 1);
+
+        _logger.LogInformation($"{numberOfColumns} columns");
 
         // Add columns
         bool columnsAdded = false;
         foreach (IXLRow row in worksheet.RowsUsed())
         {
-            // var msg = "Data: ";
-            // foreach (var cell in row.Cells())
-            // {
-            //     msg += $"[{cell}]{cell.Value} ";
-            // }
-            // _logger.LogInformation(msg);
             if (!columnsAdded)
             {
-                foreach (IXLCell cell in row.Cells())
-                {
-                    dataTable.Columns.Add(cell.Address.ColumnLetter); // Using column letters as column names
-                }
                 columnsAdded = true;
+                if (header)
+                {
+                    foreach (IXLCell cell in row.Cells())
+                    {
+                        var dc = new DataColumn(cell.Value.ToString());
+                        dataTable.Columns.Add(dc); // Using column letters as column names
+                    }
+                    continue;
+                }
+                else
+                {
+                    foreach (IXLCell cell in row.Cells())
+                    {
+                        dataTable.Columns.Add(cell.Address.ColumnLetter); // Using column letters as column names
+                    }
+                }
             }
 
             // Add row data
             var dataRow = dataTable.NewRow();
             var i = 0;
-            foreach (var cell in row.Cells()){
-                dataRow[i++] = cell.Value;
+            foreach (var cell in row.Cells(1, numberOfColumns))
+            {
+                dataRow[i++] = (!cell.Value.IsBlank) ? cell.Value : "";
             }
+            // dataRow.ItemArray = row.Cells(1, numberOfColumns).Select(cell => ((!cell.Value.IsBlank) ? cell.Value : "").ToString()).ToArray();
             dataTable.Rows.Add(dataRow);
-            // dataTable.Rows.Add(row.Cells().Select(cell => cell.Value).ToArray());
         }
 
-        foreach(DataRow dataRow in dataTable.Rows)
+        foreach (DataRow dataRow in dataTable.Rows)
         {
             var msg = "Data: ";
-            foreach(var item in dataRow.ItemArray)
+            foreach (var item in dataRow.ItemArray)
             {
                 msg += $"[{item}]";
             }
@@ -96,7 +108,8 @@ public class ExcelFileProcessor : IFileProcessor
             {
                 for (int j = 0; j < table.Columns.Count; j++)
                 {
-                    worksheet.Cell(i + 2, j + 1).Value = table.Rows[i][j].ToString();
+                    var cellValue = table.Rows[i][j];
+                    worksheet.Cell(i + 2, j + 1).Value = cellValue?.ToString() ?? "";
                 }
             }
 

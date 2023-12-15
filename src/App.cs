@@ -20,10 +20,11 @@ public class App
     {
         _logger.LogInformation("Processing Started!");
         var aggregatedData = new List<DataTable>();
+        // If opts.Header is set, allow first file header through, and skip subsequent file headers, otherwise ignore headers.
         foreach (var file in opts.InputFiles)
         {
             var processor = getFileProcessor(serviceProvider, file);
-            var fileData = processor?.ProcessFile(file);
+            var fileData = processor?.ProcessFile(file, opts.Header);
             
             foreach(var table in fileData)
             {
